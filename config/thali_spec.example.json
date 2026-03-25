@@ -1,0 +1,32 @@
+{
+  "quantity_reject_below": 0.5,
+  "quantity_pass_from": 0.6,
+  "expected_presence_items": [],
+  "bulk_foods": ["dal", "curry", "rice", "sabzi", "raita", "dahi"],
+  "food_quantity_rules": {
+    "dal": {
+      "low": 0.5,
+      "target_min": 0.6
+    },
+    "curry": {
+      "low": 0.5,
+      "target_min": 0.6
+    },
+    "rice": {
+      "low": 0.5,
+      "target_min": 0.6
+    },
+    "sabzi": {
+      "low": 0.5,
+      "target_min": 0.6
+    },
+    "raita": {
+      "low": 0.5,
+      "target_min": 0.6
+    },
+    "dahi": {
+      "low": 0.5,
+      "target_min": 0.6
+    }
+  }
+}

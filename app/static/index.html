@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mealawe Inspection Demo</title>
+  <style>
+    :root {
+      --bg: #f6f2e9;
+      --card: #fffdf8;
+      --ink: #1f1d1a;
+      --muted: #6e675d;
+      --accent: #b6482c;
+      --accent-soft: #f4d7cb;
+      --line: #e4d7c5;
+      --good: #1e7a43;
+      --bad: #b52f2f;
+      --warn: #8b5f12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, #fff7ea 0%, transparent 28%),
+        linear-gradient(135deg, #f8f1e6 0%, #f3ede2 48%, #efe6d8 100%);
+      color: var(--ink);
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      line-height: 0.95;
+      font-weight: 700;
+    }
+
+    .sub {
+      max-width: 700px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255, 253, 248, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 14px 36px rgba(75, 54, 31, 0.08);
+      backdrop-filter: blur(6px);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 1.2rem;
+    }
+
+    .dropzone {
+      border: 2px dashed #d7b79d;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      background: linear-gradient(180deg, #fffaf2 0%, #fff6ea 100%);
+    }
+
+    .preview-wrap {
+      margin-top: 16px;
+      display: none;
+      justify-content: center;
+    }
+
+    .preview {
+      width: 100%;
+      max-height: 360px;
+      border-radius: 18px;
+      background: #f1ebe1;
+      display: block;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button,
+    .file-label {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover,
+    .file-label:hover { transform: translateY(-1px); }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+
+    input[type="file"] { display: none; }
+
+    .status {
+      margin-top: 16px;
+      min-height: 24px;
+      font-size: 0.96rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .pill.good { background: #dff4e7; color: var(--good); }
+    .pill.bad { background: #f9dede; color: var(--bad); }
+    .pill.warn { background: #f6ebcf; color: var(--warn); }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 18px;
+      background: #faf4ea;
+      border: 1px solid var(--line);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.2rem;
+      margin-top: 4px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fffaf4;
+    }
+
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .mini-pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .mini-pill.ok { background: #dff4e7; color: var(--good); }
+    .mini-pill.bad { background: #f9dede; color: var(--bad); }
+    .mini-pill.warn { background: #f6ebcf; color: var(--warn); }
+
+    .foods {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    pre {
+      margin: 16px 0 0;
+      padding: 16px;
+      overflow: auto;
+      border-radius: 18px;
+      background: #201d1a;
+      color: #f8efe2;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Mealawe Demo</div>
+      <h1>Chef Upload to Quantity Gate</h1>
+      <div class="sub">
+        Upload a thali image to test the current YOLO plus quantity-check pipeline before the quality stage gets integrated.
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Upload Image</h2>
+        <div class="dropzone">
+          <div>Select one thali photo for inspection.</div>
+          <div id="previewWrap" class="preview-wrap">
+            <canvas id="previewCanvas" class="preview"></canvas>
+          </div>
+        </div>
+        <div class="controls">
+          <label class="file-label secondary" for="fileInput">Choose Image</label>
+          <input id="fileInput" type="file" accept="image/*">
+          <button id="inspectBtn" class="primary" type="button">Run Inspection</button>
+          <button id="healthBtn" class="secondary" type="button">Check API Health</button>
+        </div>
+        <div id="status" class="status">Ready for demo.</div>
+      </div>
+
+      <div class="card">
+        <h2>Result Summary</h2>
+        <div id="badges"></div>
+        <div id="meta" class="meta"></div>
+        <div id="compartments" class="list"></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 20px;">
+      <h2>Raw API Response</h2>
+      <pre id="rawOutput">No request made yet.</pre>
+    </section>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const inspectBtn = document.getElementById("inspectBtn");
+    const healthBtn = document.getElementById("healthBtn");
+    const previewWrap = document.getElementById("previewWrap");
+    const previewCanvas = document.getElementById("previewCanvas");
+    const previewCtx = previewCanvas.getContext("2d");
+    const statusEl = document.getElementById("status");
+    const badgesEl = document.getElementById("badges");
+    const metaEl = document.getElementById("meta");
+    const compartmentsEl = document.getElementById("compartments");
+    const rawOutputEl = document.getElementById("rawOutput");
+
+    let selectedFile = null;
+    let previewImage = null;
+
+    function buildCompactResponse(data) {
+      const compact = {
+        overall_status: data.overall_status,
+        quantity: {
+          raw_compartments_detected: data.quantity?.raw_compartments_detected,
+          compartments_detected: data.quantity?.compartments_detected,
+          compartments_removed_by_cleanup: data.quantity?.compartments_removed_by_cleanup,
+          foods_detected: data.quantity?.foods_detected,
+          mapping_strategy: data.quantity?.mapping_strategy,
+          mapping_diagnostics: data.quantity?.mapping_diagnostics,
+          auto_fails: data.quantity?.auto_fails,
+          mapped_summary: (data.quantity?.mapped_summary || []).map((comp) => ({
+            compartment_idx: comp.compartment_idx,
+            foods: comp.foods,
+            fill_ratio: comp.fill_ratio,
+            mask_fill_ratio: comp.mask_fill_ratio,
+            bbox_fill_ratio: comp.bbox_fill_ratio,
+            fill_ratio_method: comp.fill_ratio_method,
+            assignment_method: comp.assignment_method,
+            quantity_status: comp.quantity_status,
+            quantity_label: comp.quantity_label,
+            primary_food: comp.primary_food,
+            bbox: comp.bbox,
+            mask_polygon_points: Array.isArray(comp.mask_polygon) ? comp.mask_polygon.length : 0,
+            food_detections: (comp.food_detections || []).map((food) => ({
+              class_name: food.class_name,
+              confidence: food.confidence,
+              bbox: food.bbox,
+              mask_polygon_points: Array.isArray(food.mask_polygon) ? food.mask_polygon.length : 0
+            }))
+          }))
+        },
+        quality: data.quality
+      };
+      return compact;
+    }
+
+    function drawPreview(data = null) {
+      if (!previewImage || !previewCtx) {
+        previewWrap.style.display = "none";
+        return;
+      }
+
+      const maxWidth = 760;
+      const originalWidth = previewImage.naturalWidth || previewImage.width;
+      const originalHeight = previewImage.naturalHeight || previewImage.height;
+      const scale = Math.min(1, maxWidth / originalWidth);
+      previewCanvas.width = Math.round(originalWidth * scale);
+      previewCanvas.height = Math.round(originalHeight * scale);
+      previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      previewCtx.drawImage(previewImage, 0, 0, previewCanvas.width, previewCanvas.height);
+      previewWrap.style.display = "flex";
+
+      if (!data?.quantity?.mapped_summary?.length) {
+        return;
+      }
+
+      const statusColors = {
+        OK: "#1e7a43",
+        PRESENCE_ONLY: "#1e7a43",
+        LOW: "#b52f2f",
+        HIGH: "#b52f2f",
+        SLIGHTLY_LOW: "#8b5f12",
+        SLIGHTLY_HIGH: "#8b5f12",
+        EMPTY: "#b52f2f"
+      };
+      const foodColors = {
+        rice: "#f6f1d3",
+        curry: "#f0b43a",
+        dal: "#d9a129",
+        sabzi: "#7ca33c",
+        raita: "#8fc9d6",
+        dahi: "#c3dce6",
+        salad: "#52a552",
+        sweet: "#d6b04a",
+        roti: "#b78a57"
+      };
+
+      previewCtx.lineWidth = Math.max(2, previewCanvas.width / 250);
+      previewCtx.font = `${Math.max(14, previewCanvas.width / 45)}px Georgia`;
+
+      data.quantity.mapped_summary.forEach((comp) => {
+        const x1 = Math.round(comp.bbox.x1 * scale);
+        const y1 = Math.round(comp.bbox.y1 * scale);
+        const x2 = Math.round(comp.bbox.x2 * scale);
+        const y2 = Math.round(comp.bbox.y2 * scale);
+        const color = statusColors[comp.quantity_status] || "#2f4858";
+        const labelFoods = comp.foods?.length ? comp.foods.join(", ") : "EMPTY";
+        const label = `C${comp.compartment_idx}: ${labelFoods}`;
+        const status = comp.quantity_label || comp.quantity_status;
+
+        if (comp.mask_polygon?.length) {
+          previewCtx.beginPath();
+          comp.mask_polygon.forEach(([px, py], index) => {
+            const sx = Math.round(px * scale);
+            const sy = Math.round(py * scale);
+            if (index === 0) {
+              previewCtx.moveTo(sx, sy);
+            } else {
+              previewCtx.lineTo(sx, sy);
+            }
+          });
+          previewCtx.closePath();
+          previewCtx.fillStyle = `${color}44`;
+          previewCtx.fill();
+          previewCtx.strokeStyle = color;
+          previewCtx.lineWidth = Math.max(2, previewCanvas.width / 320);
+          previewCtx.stroke();
+        }
+
+        (comp.food_detections || []).forEach((food) => {
+          const polygon = food.mask_polygon || [];
+          if (!polygon.length) {
+            return;
+          }
+          const foodColor = foodColors[food.class_name] || "#4f8bb8";
+          previewCtx.beginPath();
+          polygon.forEach(([px, py], index) => {
+            const sx = Math.round(px * scale);
+            const sy = Math.round(py * scale);
+            if (index === 0) {
+              previewCtx.moveTo(sx, sy);
+            } else {
+              previewCtx.lineTo(sx, sy);
+            }
+          });
+          previewCtx.closePath();
+          previewCtx.fillStyle = `${foodColor}55`;
+          previewCtx.fill();
+          previewCtx.strokeStyle = foodColor;
+          previewCtx.lineWidth = Math.max(1.5, previewCanvas.width / 500);
+          previewCtx.stroke();
+        });
+
+        previewCtx.strokeStyle = color;
+        previewCtx.lineWidth = Math.max(2, previewCanvas.width / 250);
+        previewCtx.strokeRect(x1, y1, Math.max(1, x2 - x1), Math.max(1, y2 - y1));
+
+        const text = `${label} | ${status}`;
+        const textMetrics = previewCtx.measureText(text);
+        const textHeight = Math.max(20, previewCanvas.width / 28);
+        const textWidth = textMetrics.width + 12;
+        const textY = Math.max(textHeight + 4, y1);
+
+        previewCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        previewCtx.fillRect(x1, textY - textHeight, textWidth, textHeight);
+
+        previewCtx.fillStyle = "#ffffff";
+        previewCtx.fillText(text, x1 + 6, textY - 6);
+      });
+    }
+
+    fileInput.addEventListener("change", () => {
+      selectedFile = fileInput.files[0] || null;
+      if (!selectedFile) {
+        previewImage = null;
+        drawPreview();
+        statusEl.textContent = "No image selected.";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          previewImage = img;
+          drawPreview();
+          statusEl.textContent = `Selected: ${selectedFile.name}`;
+        };
+        img.onerror = () => {
+          statusEl.textContent = "Could not load the selected image.";
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(selectedFile);
+      statusEl.textContent = "Loading image preview...";
+    });
+
+    function renderBadges(data) {
+      const quantity = data.quantity || {};
+      const statusClass = data.overall_status === "PASSED_QUANTITY_STAGE" ? "good" : "bad";
+      badgesEl.innerHTML = `
+        <span class="pill ${statusClass}">${data.overall_status || "UNKNOWN"}</span>
+        <span class="pill warn">Mapping: ${quantity.mapping_strategy || "n/a"}</span>
+      `;
+    }
+
+    function renderMeta(data) {
+      const quantity = data.quantity || {};
+      const diagnostics = quantity.mapping_diagnostics || {};
+      metaEl.innerHTML = `
+        <div class="stat">Compartments Kept<strong>${quantity.compartments_detected ?? 0}</strong></div>
+        <div class="stat">Cleanup Removed<strong>${quantity.compartments_removed_by_cleanup ?? 0}</strong></div>
+        <div class="stat">Foods Detected<strong>${quantity.foods_detected ?? 0}</strong></div>
+        <div class="stat">Assigned by Center/BBox<strong>${(diagnostics.center_bbox ?? 0) + (diagnostics.box_iou ?? 0)}</strong></div>
+        <div class="stat">Auto Fails<strong>${(quantity.auto_fails || []).length}</strong></div>
+      `;
+    }
+
+    function renderCompartments(data) {
+      const mapped = data.quantity?.mapped_summary || [];
+      if (!mapped.length) {
+        compartmentsEl.innerHTML = `<div class="item">No compartments returned.</div>`;
+        return;
+      }
+
+      compartmentsEl.innerHTML = mapped.map((comp) => {
+        const status = comp.quantity_status || "UNKNOWN";
+        const statusClass = ["OK", "PRESENCE_ONLY"].includes(status)
+          ? "ok"
+          : (["LOW", "HIGH"].includes(status) ? "bad" : "warn");
+        const thresholds = comp.thresholds
+          ? `Reject below: ${comp.thresholds.low ?? "-"} | Pass from: ${comp.thresholds.target_min ?? "-"}`
+          : "Expected: not applicable";
+        return `
+        <div class="item">
+          <div class="item-head">
+            <strong>Compartment ${comp.compartment_idx}</strong>
+            <span class="mini-pill ${statusClass}">${comp.quantity_label || status}</span>
+          </div>
+          <div class="foods">Foods: ${comp.foods?.length ? comp.foods.join(", ") : "EMPTY"}</div>
+          <div class="foods">Fill ratio: ${(comp.fill_ratio ?? 0).toFixed(2)}</div>
+          <div class="foods">Mask fill: ${(comp.mask_fill_ratio ?? 0).toFixed(2)} | BBox fill: ${(comp.bbox_fill_ratio ?? 0).toFixed(2)}</div>
+          <div class="foods">Fill method: ${comp.fill_ratio_method}</div>
+          <div class="foods">Primary food: ${comp.primary_food || "n/a"}</div>
+          <div class="foods">Assignment: ${comp.assignment_method}</div>
+          <div class="foods">${thresholds}</div>
+        </div>
+      `;
+      }).join("");
+    }
+
+    function renderResponse(data) {
+      renderBadges(data);
+      renderMeta(data);
+      renderCompartments(data);
+      try {
+        drawPreview(data);
+      } catch (error) {
+        statusEl.textContent = `Overlay render issue: ${error.message}`;
+      }
+      rawOutputEl.textContent = JSON.stringify(buildCompactResponse(data), null, 2);
+    }
+
+    healthBtn.addEventListener("click", async () => {
+      statusEl.textContent = "Checking API health...";
+      try {
+        const response = await fetch("/health");
+        const data = await response.json();
+        rawOutputEl.textContent = JSON.stringify(data, null, 2);
+        badgesEl.innerHTML = `<span class="pill good">API ${data.status}</span>`;
+        metaEl.innerHTML = `
+          <div class="stat">Model Loaded<strong>${data.model_loaded}</strong></div>
+          <div class="stat">Model Exists<strong>${data.model_exists}</strong></div>
+        `;
+        compartmentsEl.innerHTML = "";
+        drawPreview();
+        statusEl.textContent = "API is healthy.";
+      } catch (error) {
+        statusEl.textContent = `Health check failed: ${error.message}`;
+      }
+    });
+
+    inspectBtn.addEventListener("click", async () => {
+      if (!selectedFile) {
+        statusEl.textContent = "Please choose an image first.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      statusEl.textContent = "Running inspection...";
+      inspectBtn.disabled = true;
+
+      try {
+        const response = await fetch("/inspect", {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || "Inspection failed");
+        }
+        renderResponse(data);
+        statusEl.textContent = "Inspection complete.";
+      } catch (error) {
+        statusEl.textContent = `Inspection failed: ${error.message}`;
+        rawOutputEl.textContent = `Inspection error: ${String(error)}`;
+      } finally {
+        inspectBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
