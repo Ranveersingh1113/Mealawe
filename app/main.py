@@ -12,7 +12,7 @@ from PIL import Image
 from ultralytics import YOLO
 
 from app.pipeline import run_quantity_stage
-from app.quality_client import run_quality_stage_placeholder
+from app.quality_client import run_quality_stage
 from app.schemas import BatchInspectionResponse, HealthResponse, InspectionResponse
 from quantity_estimator import QuantityEstimator
 
@@ -63,12 +63,23 @@ def _run_single_inspection(image_bytes: bytes) -> InspectionResponse:
             quality=None,
         )
 
-    quality_result = run_quality_stage_placeholder(
+    quality_result = run_quality_stage(
         image_bytes=image_bytes,
         compartments=quantity_result.needs_quality_stage,
     )
+    
+    # Assess overall status combining CV and VLM
+    if quality_result.status == "POOR":
+        final_status = "REJECTED_AT_QUALITY_STAGE"
+    elif quality_result.status == "ACCEPTABLE":
+        final_status = "PASSED_WITH_WARNINGS"
+    elif quality_result.status == "VLM_ERROR":
+        final_status = "PASSED_QUANTITY_PENDING_QUALITY_RETRY" 
+    else:
+        final_status = "PASSED_ALL_STAGES"
+
     return InspectionResponse(
-        overall_status="PASSED_QUANTITY_STAGE",
+        overall_status=final_status,
         quantity=quantity_result,
         quality=quality_result,
     )

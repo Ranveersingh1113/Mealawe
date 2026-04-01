@@ -239,9 +239,9 @@
   <div class="shell">
     <section class="hero">
       <div class="eyebrow">Mealawe Demo</div>
-      <h1>Chef Upload to Quantity Gate</h1>
+      <h1>Mealawe's Quantity and Quality Verification system for Thali</h1>
       <div class="sub">
-        Upload a thali image to test the current YOLO plus quantity-check pipeline before the quality stage gets integrated.
+        Upload a thali image to test the current YOLO plus quantity-check along with the quality check pipeline
       </div>
     </section>
 
@@ -264,10 +264,16 @@
       </div>
 
       <div class="card">
-        <h2>Result Summary</h2>
+        <h2>Quantity Summary</h2>
         <div id="badges"></div>
         <div id="meta" class="meta"></div>
         <div id="compartments" class="list"></div>
+      </div>
+      
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>Quality Assessment</h2>
+        <div id="qualityBadges"></div>
+        <div id="qualityInfo" class="list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;"></div>
       </div>
     </section>
 
@@ -288,6 +294,8 @@
     const badgesEl = document.getElementById("badges");
     const metaEl = document.getElementById("meta");
     const compartmentsEl = document.getElementById("compartments");
+    const qualityBadgesEl = document.getElementById("qualityBadges");
+    const qualityInfoEl = document.getElementById("qualityInfo");
     const rawOutputEl = document.getElementById("rawOutput");
 
     let selectedFile = null;
@@ -525,10 +533,76 @@
       }).join("");
     }
 
+    function renderQuality(data) {
+      const quality = data.quality;
+      if (!quality || !quality.compartment_candidates || quality.compartment_candidates.length === 0) {
+        qualityBadgesEl.innerHTML = `<span class="pill warn">Quality Stage Pending / Skipped</span>`;
+        qualityInfoEl.innerHTML = "";
+        return;
+      }
+      
+      const statusClass = quality.status === "GOOD" ? "good" : (quality.status === "POOR" ? "bad" : "warn");
+      qualityBadgesEl.innerHTML = `<span class="pill ${statusClass}">Overall Quality: ${quality.status}</span>`;
+      
+      const vlmJson = quality.compartment_candidates[0] || {};
+      const vlmQuality = vlmJson.quality || {};
+      const vlmQuantity = vlmJson.quantity || {};
+      const items = vlmQuality.items || [];
+      const quantityItems = vlmQuantity.items || [];
+      const overallNotes = vlmJson.notes || "No overall notes provided.";
+      
+      if (items.length === 0) {
+        qualityInfoEl.innerHTML = `<div class="item">No specific element details returned by VLM.</div>`;
+        return;
+      }
+
+      // Create map for fast quantity lookup (case insensitive)
+      const qMap = {};
+      quantityItems.forEach(q => { qMap[(q.item || "").toLowerCase()] = q; });
+
+      const cardsHtml = items.map((f) => {
+        if (!f.present) return ""; // Skip missing elements
+        
+        const rColor = f.rating === "Good" ? "var(--good)" : (f.rating === "Poor" ? "var(--bad)" : "var(--warn)");
+        const rBg = f.rating === "Good" ? "#dff4e7" : (f.rating === "Poor" ? "#f9dede" : "#f6ebcf");
+        
+        let quantityDetails = "<strong>Quantity:</strong> Unknown";
+        const qData = qMap[(f.item || "").toLowerCase()];
+        if (qData) {
+           const thresholdMsg = qData.status === "verified" ? ">= 75% Full" : (qData.estimated_fill_ratio ? `${Math.round(qData.estimated_fill_ratio * 100)}% Full` : "Not Verified");
+           quantityDetails = `<strong>Quantity:</strong> ${thresholdMsg} &mdash; <em>${qData.reason || "No reason specified."}</em>`;
+        }
+        
+        const issuesText = f.issues && f.issues.length ? f.issues.join(", ") : "None Detected";
+        const issuesColor = f.issues && f.issues.length ? "var(--bad)" : "var(--ink)";
+
+        return `
+          <div class="item" style="border-left: 4px solid ${rColor};">
+            <div class="item-head">
+              <strong style="text-transform: uppercase; font-size: 1.1rem;">${f.item}</strong>
+              <span class="mini-pill" style="background: ${rBg}; color: ${rColor};">${f.rating}</span>
+            </div>
+            <div class="foods" style="margin-top: 8px;"><strong>Confidence:</strong> ${(f.confidence ?? 0).toFixed(2)}</div>
+            <div class="foods" style="margin-top: 4px;">${quantityDetails}</div>
+            <div class="foods" style="margin-top: 8px; line-height: 1.4;"><strong>Evidence:</strong> ${f.evidence || "No evidence provided."}</div>
+            <div class="foods" style="margin-top: 4px; color: ${issuesColor};"><strong>Issues:</strong> ${issuesText}</div>
+          </div>
+        `;
+      }).join("");
+
+      qualityInfoEl.innerHTML = cardsHtml + `
+        <div class="item" style="grid-column: 1 / -1; background: #faf8f5; border: 1px solid var(--accent); border-radius: 12px; padding: 16px;">
+          <strong style="display: block; margin-bottom: 8px; font-size: 1.1rem; color: var(--accent);">Targeted Verification Summary:</strong>
+          <div class="foods" style="font-size: 1rem; color: var(--ink); line-height: 1.6;">${overallNotes}</div>
+        </div>
+      `;
+    }
+
     function renderResponse(data) {
       renderBadges(data);
       renderMeta(data);
       renderCompartments(data);
+      renderQuality(data);
       try {
         drawPreview(data);
       } catch (error) {
@@ -549,6 +623,8 @@
           <div class="stat">Model Exists<strong>${data.model_exists}</strong></div>
         `;
         compartmentsEl.innerHTML = "";
+        qualityBadgesEl.innerHTML = "";
+        qualityInfoEl.innerHTML = "";
         drawPreview();
         statusEl.textContent = "API is healthy.";
       } catch (error) {
