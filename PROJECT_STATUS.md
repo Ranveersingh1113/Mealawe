@@ -101,13 +101,16 @@ Recommended VLM output:
 
 ## Files that matter now
 
-- [README.md](D:/OneDrive/Desktop/mealawe/README.md)
-- [START.md](D:/OneDrive/Desktop/mealawe/START.md)
-- [app/main.py](D:/OneDrive/Desktop/mealawe/app/main.py)
-- [app/pipeline.py](D:/OneDrive/Desktop/mealawe/app/pipeline.py)
-- [app/static/index.html](D:/OneDrive/Desktop/mealawe/app/static/index.html)
-- [quantity_estimator.py](D:/OneDrive/Desktop/mealawe/quantity_estimator.py)
-- [config/thali_spec.example.json](D:/OneDrive/Desktop/mealawe/config/thali_spec.example.json)
+- [README.md](README.md)
+- [START.md](START.md)
+- [app/main.py](app/main.py)
+- [app/pipeline.py](app/pipeline.py)
+- [app/quality_client.py](app/quality_client.py)
+- [app/schemas.py](app/schemas.py)
+- [app/static/index.html](app/static/index.html)
+- [quantity_estimator.py](quantity_estimator.py)
+- [config/thali_spec.example.json](config/thali_spec.example.json)
+- [quality-verification/](quality-verification/)
 
 ## Notes on cleanup done today
 
