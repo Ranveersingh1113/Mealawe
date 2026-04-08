@@ -4,7 +4,7 @@ import random
 import shutil
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import cv2
 import numpy as np
@@ -30,13 +30,29 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def coerce_polygon(poly: List[object]) -> Optional[List[float]]:
+    coerced: List[float] = []
+    for value in poly:
+        try:
+            coerced.append(float(value))
+        except (TypeError, ValueError):
+            return None
+    return coerced
+
+
 def coco_segmentation_to_polygons(segmentation) -> List[List[float]]:
     if isinstance(segmentation, list):
         if len(segmentation) == 0:
             return []
         if isinstance(segmentation[0], list):
-            return segmentation
-        return [segmentation]
+            polygons = []
+            for poly in segmentation:
+                coerced = coerce_polygon(poly)
+                if coerced is not None:
+                    polygons.append(coerced)
+            return polygons
+        coerced = coerce_polygon(segmentation)
+        return [coerced] if coerced is not None else []
     if isinstance(segmentation, dict):
         mask = cocomask.decode(segmentation)
         if mask.ndim == 3:

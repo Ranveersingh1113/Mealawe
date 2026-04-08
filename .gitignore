@@ -10,11 +10,14 @@
 .DS_Store
 
 # Core App ignores
-datasets/
+/datasets/*
+!/datasets/mealawe_yolo_seg_v2/
+!/datasets/mealawe_yolo_seg_v2/**
 runs/
 evaluation/
-"Mealawe 2.coco/"
-"Mealawe 2.coco-segmentation/"
+/Mealawe 2.coco/
+/Mealawe 2.coco-segmentation/
+/Mealawe 2.coco-segmentation (1)/
 
 # Verification Pipeline Ignores
 quality-verification/results/
