@@ -1,4 +1,4 @@
-# Mealawe Thali Inspection
+7x# Mealawe Thali Inspection
 
 A `YOLO + quantity gate + VLM quality gate + demo UI` pipeline for Mealawe's thali inspection flow.
 

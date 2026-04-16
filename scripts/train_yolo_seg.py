@@ -50,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--name", default="seg")
     parser.add_argument("--patience", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--resume", action="store_true", help="Resume training from an existing checkpoint")
     return parser.parse_args()
 
 
@@ -104,6 +105,7 @@ def main() -> None:
         mask_ratio=4,
         val=True,
         plots=True,
+        resume=args.resume,
     )
 
     print("\nRunning validation on best checkpoint...")
